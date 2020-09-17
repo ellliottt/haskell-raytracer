@@ -1,0 +1,98 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+% \usepackage{minted}
+
+\title{Realtime Ray Tracing}
+\author{...}
+\date{...}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\section{Introduction}
+
+    Raytracing is a rendering technique that can produce photorealistic results. It works by
+    simulating the paths of light as it moves through the scene. Each light bounce is simulated by
+    sending subsequent rays from the intersection point.
+
+\section{Raytracing Algorithm}
+
+    At first, achieving photorealistic rendering appears to requires simulating every photon in a
+    scene. Without this simulation, the resulting image can only be a rough approximation of the
+    complicated interactions occuring in the real world.
+
+    A photon travels from the light source until it hits an object. Then, depending on the surface
+    normal and material, one or more photons are emitted, absorbing some of the color of the
+    material. This process is recursive, as each emitted photon must be traced. It is also
+    exponential. If a given surface emits more than one photon, and assuming that each photon is
+    guaranteed to hit another object, the number of photons in the scene will be given by $n^k$ for
+    the initial number of photons $n$ and a maximum bouce threshold $k$. This means the number of
+    simulated rays grows at an exponential rate with respect to the complexity of the scene. Such
+    an algorithm is not scalable due to this factor. If a photon hits the camera, its colour is
+    plotted as a pixel onto the output image. However, in most scenes, most photons will not hit
+    the camera. They may continue bouncing until they hit the maximum number of bouces $k$, or they
+    may not hit anything and continue moving away from the scene forever. This makes simulating
+    each photon computationally infeasable. A very large number of photons must be simulated, and
+    most of this computation will be useless in producing an image.
+
+    A more practical, but still computationally difficult, method is to reverse the direction of
+    simulation. Instead of tracing the path of each photon from the light source, rays can be sent
+    out from the camera. The same check is performed for intersection for shapes, and recursive
+    ray are emitted. A ray stops once it hits the maxiumum bounce threshold $k$, or hits a light
+    source. While this seems counter-intuitive, as photons do not travel from the camera, by doing
+    this, only the rays necessary for computing the output image are simulated.
+
+    \subsection{Camera}
+        The first step is to define a camera. It can be assumed that the camera point is centered at
+        the origin and, by convention, pointing in the negative $z$ direction. The \emph{viewport} is a
+        plane representing the screen, positioned perpendicular to the $z$ axis, intersecting the $z$
+        axis in the plane's center, shifted along the $z$ axis by $-k$, where $k$ is the
+        \emph{focal length} of the camera. Thus, the equation for a viewport of size $n\times m$ is
+        given by:
+        \begin{equation*}
+            z = -k, -\frac{n}{2} \leq x \leq \frac{n}{2}, -\frac{m}{2} \leq y \leq \frac{m}{2}
+        \end{equation*}
+        Rays can be sent from the origin through the position on the viewport that each pixel would be,
+        and the colour of that ray can be plotted at that pixel location.
+
+    \subsection{Primary Ray}
+        Next is computing the \emph{primary ray}. This is the initial ray that is sent by the camera
+        into the scene. A ray is nothing more than a line in 3 dimensions, so the primary ray is given
+        by:
+        \begin{equation*}
+            ux + vy - kz = 0, -\frac{n}{2} \leq u \leq \frac{n}{2}, -\frac{m}{2} \leq v \leq \frac{m}{2}
+        \end{equation*}
+        where $u$ and $v$ control the position of the intersection with the viewport, representing the
+        pixel to be calculated. This ray then extends through the viewport and into the scene.
+
+    \subsection{Scene Intersection}
+        The closest intersection between the primary ray and the scene can be found by taking the
+        minimum of $\delta S$, for each shape $S$, and a distance function $\delta$. This distance
+        function can be defined for each primitive shape, such as spheres, cubes, and planes, and
+        can be written for triangles to allow for arbitrary mesh rendering.
+
+        \subsubsection{Sphere Intersection}
+            The equation of a sphere of radius $r$ is given by:
+            \begin{equation*}
+                x^2 + y^2 + z^2 = r^2
+            \end{equation*}
+            This means that any point $P$ that satisfies the above equation must be on the surface
+            of the sphere. For an arbitrary center $C$, the equation is:
+            \begin{equation*}
+                (x - C_x)^2 + (y - C_y)^2 + (z - C_z)^2 = r^2
+            \end{equation*}
+            As $P$ and $C$ are vectors, this can be written as:
+            \begin{equation*}
+                (P - C) \cdot (P - C) - r^2 = 0
+            \end{equation*}
+
+        \subsubsection{Plane Intersection}
+
+
+
+\end{document}
+
